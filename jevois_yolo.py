@@ -141,9 +141,9 @@ while True:
             folder1 = folder + "/" + class_id + "/"
             #todo test if conf is greater than thresh. Should always be the case
             if Headless:
-               logging.info(class_id+" found")
+               logging.info(class_id+" found:"+conf)
             else:
-               print (class_id+" found")
+               print (class_id+" found:"+conf)
          
             if class_id != "person" and class_id != "cat":
                #can't handle all the other classes yet
@@ -157,8 +157,8 @@ while True:
                print("writing image: "+imagefile)
             crop_img = img[0:480, 0:640] # crop to single image.
             #crop_img = img[0:480, 640:1280] # use if you want the Yolo results
-            cv2.circle(crop_img,(x,y),25,(0,255,0),5)
-            cv2.rectangle(crop_img,(x-w,y-h),(x+w,y+h),(255,255,0),5)
+            cv2.circle(crop_img,(x,y),25,(0,255,0),2)
+            cv2.rectangle(crop_img,(x-w,y-h),(x+w,y+h),(255,255,0),2)
             cv2.imwrite(folder1+imagefile,crop_img)
       
 
