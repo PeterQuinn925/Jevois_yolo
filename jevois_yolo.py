@@ -21,7 +21,7 @@ def SendParm(cmd):
       
 #main -------
 Headless=True
-thresh=25 # default detection threshold
+thresh=50 # default detection threshold
 if len(sys.argv)>1:
    if sys.argv[1]=='-show':
       Headless=False
@@ -100,9 +100,9 @@ while True:
    line = ser.readline()
    if not Headless:
       print (line.decode('utf8'))
-   #example output when capturing a selection
-   # b'N2 person -388 -550 1316 1981\r\n'
-   #   N2 id       x     y     w    h 
+   #example output when capturing a selection //changed with Yolov3 update
+   # b'N2 person:51.5 -1394 -697 841 1519
+   #   N2 id:confidence       x     y     w    h 
    # http://jevois.org/qa/index.php?qa=2079&qa_1=yolo-coordinate-output-to-serial-what-data-is-output
    # coord system is -1000 to 1000 with 0,0 in the cam center. http://jevois.org/doc/group__coordhelpers.html
    # x,y appears to be the upper left of the box
@@ -115,7 +115,10 @@ while True:
       else:
          line_split = line.split(b" ")
          if len(line_split)>5:
-            line_split[1] = line_split[1].decode('utf8') #line_split[1] is the class of object found
+            line_split[1] = line_split[1].decode('utf8') #line_split[1] is the class of object found and confidence%
+            id_conf = line_split[1].split(":") #split again on : to separate the class and confidence
+            class_id = id_conf[0]
+            conf = id_conf[1] #for future use
             x = int(line_split[2])
             y = int(line_split[3])
             w = int(line_split[4])
@@ -135,14 +138,14 @@ while True:
                print ("w= "+str(w))
                print ("h= "+str(h))
          
-            folder1 = folder + "/" + line_split[1] + "/"
-
+            folder1 = folder + "/" + class_id + "/"
+            #todo test if conf is greater than thresh. Should always be the case
             if Headless:
-               logging.info(line_split[1]+" found")
+               logging.info(class_id+" found")
             else:
-               print (line_split[1]+" found")
+               print (class_id+" found")
          
-            if line_split[1] != "person" and line_split[1] != "cat":
+            if class_id != "person" and class_id != "cat":
                #can't handle all the other classes yet
                folder1 = folder + "/other/"
 
