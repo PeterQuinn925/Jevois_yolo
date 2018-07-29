@@ -118,7 +118,7 @@ while True:
             line_split[1] = line_split[1].decode('utf8') #line_split[1] is the class of object found and confidence%
             id_conf = line_split[1].split(":") #split again on : to separate the class and confidence
             class_id = id_conf[0]
-            conf = id_conf[1] #for future use
+            conf = id_conf[1] 
             x = int(line_split[2])
             y = int(line_split[3])
             w = int(line_split[4])
@@ -155,10 +155,14 @@ while True:
                 logging.info("writing image: "+imagefile)
             else:
                print("writing image: "+imagefile)
-            crop_img = img[0:480, 0:640] # crop to single image.
-            #crop_img = img[0:480, 640:1280] # use if you want the Yolo results
+            box_color=(255,255,0)
+            #crop_img = img[0:480, 0:640] # crop to single image.
+            crop_img = img[0:480, 640:1280] # use if you want the Yolo results
             cv2.circle(crop_img,(x,y),25,(0,255,0),2)
-            cv2.rectangle(crop_img,(x-w,y-h),(x+w,y+h),(255,255,0),2)
+            cv2.rectangle(crop_img,(x-w,y-h),(x+w,y+h),box_color,2)
+            #put label on bounding box
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(crop_img,class_id+":"+conf,(x-w,y-h),font,0.5,box_color,1,cv2.LINE_AA)
             cv2.imwrite(folder1+imagefile,crop_img)
       
 
