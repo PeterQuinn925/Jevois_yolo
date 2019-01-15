@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-TWaccount_sid = 'ACXXXXXXXXXXXXXXXXXXXXXX'
-TWauth_token = 'lotsofrandomcharachters'
+TWaccount_sid = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+TWauth_token = 'lotsarandomchars'
 
 import os,sys
 import time
 import shutil
 import cv2
+import numpy
 import serial
 import logging
 from datetime import datetime
@@ -58,14 +59,15 @@ else: #linux
 
 logging.basicConfig(filename=logfile,level=logging.DEBUG)
 logging.info('------- Jevois Cam Startup --------')
-ser = serial.Serial(port,115200,timeout=1)
+
+ser = serial.Serial(port,115200,timeout=0.01)
 
 # No windows in headless
 if not Headless:
    cv2.namedWindow("jevois", cv2.WINDOW_NORMAL)
    cv2.resizeWindow("jevois",1280,480) 
 
-# cam 0 on pi, cam 1 on PC
+
 camera = cv2.VideoCapture(camno)
 
 #initialize the jevois cam. See below - don't change these as it will change the Jevois engine from YOLO to something else
@@ -74,7 +76,7 @@ camera.set(4,480) #height
 camera.set(5,15) #fps
 s,img = camera.read()
 #wait for Yolo to load on camera.
-time.sleep(10)
+time.sleep(120)
 
 
 #setmapping2 YUYV 640 480 15.0 JeVois DarknetYOLO
@@ -107,10 +109,13 @@ SendParm (thresh_param) # set the threshold for detection %
 client = Client(TWaccount_sid, TWauth_token)
 text_time = time.time() #initialize the time of last text to now
 
+n_img = 6 #save this many images per capture - useful if the cam is slow to detect
+img = numpy.empty(n_img, dtype=object)
+
+
 while True:
-   s,img = camera.read()
    if not Headless:
-      cv2.imshow("jevois", img )
+      cv2.imshow("jevois", img[0] )
       cv2.waitKey(1)
    line = ser.readline()
    if not Headless:
@@ -152,8 +157,14 @@ while True:
             else:
                print("writing image: "+imagefile)
             #crop_img = img[0:480, 0:640] # crop to single image.
-            crop_img = img[0:480, 640:1280] # use if you want the Yolo results
+            for i in range(0,n_img): #there might be a delay, capture many images
+               s,img[i] = camera.read()
+            img0 = img[5]
+            crop_img = img0[0:480, 640:1280] # use if you want the Yolo results
             cv2.imwrite(folder1+imagefile,crop_img)
+#            for i in range(0,n_img-1):
+#               cv2.imwrite(folder1+str(i)+'_'+imagefile,img[i])
+
             #Upload image to Google Drive
             #Call Blythe's code to do this
             try:
@@ -175,7 +186,7 @@ while True:
             os.remove(folder1+imagefile)
 
 
-            if (time.time() - text_time)> 30: #don't send texts more than one every 5 minutes
+            if (time.time() - text_time)> 300: #don't send texts more than one every 5 minutes
                text_time = time.time() #reset last text time to now
                text_body = class_id + " is at the front door. "+ med_URL+ " Conf: " + conf
                #can't get actual filename for jpg to pass via media_URL, so including it as a link
