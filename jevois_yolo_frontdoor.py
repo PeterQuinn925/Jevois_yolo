@@ -192,8 +192,8 @@ while True:
                #can't get actual filename for jpg to pass via media_URL, so including it as a link
                
                message = client.messages.create(body=text_body,
-                                                from_='+14156350573',
-                                                to='+14157942264')
+                                                from_='+1415555573',
+                                                to='+14155551212')
                print (message.sid)
 
                                                 
