@@ -11,11 +11,13 @@ Python script to set up Jevois is already basically done from my previous work. 
 The changes to motion uploader are to comment out some stuff that I didn't use plus fixed up motion_uploader for Python 3 style print
 
 Install google drive APIs and http2lib and twilio
-Pip3 install httplib2
+
+```
+pip3 install httplib2
 sudo pip3 install --upgrade google-api-python-client
 pip3 install --upgrade oauth2client
-pip3 install twilio 
-
+pip3 install twilio
+```
 Chmod + x the python script
 
 Profit!
